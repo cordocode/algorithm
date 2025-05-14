@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+from settings import Settings
 
 #load in the api key from .env
 load_dotenv()
@@ -10,23 +11,25 @@ api_key = os.getenv('ALPHA_VANTAGE_API_KEY')
 
 #build the class for customizing pulling news data
 class AlphaVantageNews:
-    """pull a certain amount of news in realtime 
-    relative to a given ticker, return average sentiment"""
+    """pull a certain amount of news in realtime relative to a given ticker, return average sentiment"""
 
     #set up parameter for stock and optional variable for limit of articles
-    def __init__(self):
+    def __init__(self, settings):
         self.function = "NEWS_SENTIMENT"
         self.base_url = "https://www.alphavantage.co/query"
         self.api_key = api_key
+        
+        #use the settings for specific instance varaibles
+        self.settings = settings
 
-    def get_news(self, ticker, limit=1, sort = "LATEST"):
+    def get_news(self):
         
         #build the dictionary of key/value pairs we want to request 
         params = {
             "function": self.function,
-            "tickers": ticker,
-            "limit": limit,
-            "sort": sort,
+            "tickers": self.settings.ticker,
+            "limit": self.settings.limit,
+            "sort": self.settings.sort,
             "apikey": self.api_key
         }
 
@@ -49,8 +52,3 @@ class AlphaVantageNews:
     
         # Return the average
         print(total_sentiment / len(feed))
-
-#test instance for apple
-news = AlphaVantageNews()
-news.get_news("NVDA")
-news.average_sentiment()

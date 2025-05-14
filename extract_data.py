@@ -2,6 +2,7 @@ import os
 import requests
 from dotenv import load_dotenv
 from pathlib import Path
+from settings import Settings
 
 #load in the api key from .env
 load_dotenv()
@@ -12,23 +13,22 @@ api_key = os.getenv('ALPHA_VANTAGE_API_KEY')
 class AlphaVantageMarketData:
     """pull live data from the markets, return most recent close_data"""
 
-    def __init__(self):
+    def __init__(self, settings):
         self.function = "TIME_SERIES_INTRADAY"
         self.base_url = "https://www.alphavantage.co/query"
         self.api_key = api_key
 
-    def get_market_data(self, symbol, interval = "60min", extended_hours = "true"):
+        #initialize the settings instance
+        self.settings = settings
 
-        #defining these variables so we can access them elsewhere
-        self.interval = interval 
-        self.symbol = symbol
+    def get_market_data(self):
 
         #the actual formatted call to the API
         params = {
         "function": self.function,
-        "symbol": symbol,                 
-        "interval": interval,            
-        "extended_hours": extended_hours, 
+        "symbol": self.settings.ticker,                 
+        "interval": self.settings.interval,            
+        "extended_hours": self.settings.extended_hours, 
         "apikey": self.api_key
     }
         
@@ -41,7 +41,7 @@ class AlphaVantageMarketData:
         print(self.data)
     
     # Get the time series data with the correct interval
-        time_series = self.data[f'Time Series ({self.interval})']
+        time_series = self.data[f'Time Series ({self.settings.interval})']
     
     # Get the first (most recent) timestamp
         most_recent_timestamp = list(time_series.keys())[0]
@@ -55,12 +55,14 @@ class AlphaVantageMarketData:
     def update_close_value(self):
     #get timestamps and close price
         most_recent_timestamp, close_price = self.extract_close_value()
-        path = Path('market_data.json')
+        file = os.getenv('LOCAL_DATA_FILE')
+        path = Path(file)
         string = f"{most_recent_timestamp}: {close_price}"
         path.write_text(string)
 
 
-#test instance for apple
-data = AlphaVantageMarketData()
-data.get_market_data("NVDA", "1min")
-data.update_close_value()
+settings = Settings()
+thing = AlphaVantageMarketData(settings)
+thing.get_market_data()
+timestamp, price = thing.extract_close_value()
+print(f"The current price of {settings.ticker} is {price}")

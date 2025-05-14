@@ -53,7 +53,3 @@ class PaperTradingAccount:
         )
         return market_order
 
-
-#example instance
-investment = PaperTradingAccount()
-investment.buy("AAPL", 5)
