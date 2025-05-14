@@ -3,12 +3,14 @@ import requests
 from dotenv import load_dotenv
 from pathlib import Path
 from settings import Settings
+from alpaca.data.live import StockDataStream
 
 #load in the api key from .env
 load_dotenv()
 
 #grab env from .env - set as api_key
-api_key = os.getenv('ALPHA_VANTAGE_API_KEY')
+api_key = os.getenv("ALPACA_API_KEY")
+secret_key = os.getenv("ALPACA_SECRET")
 
 class AlphaVantageMarketData:
     """pull live data from the markets, return most recent close_data"""
@@ -53,12 +55,17 @@ class AlphaVantageMarketData:
         return most_recent_timestamp, close_price
 
     def update_close_value(self):
-    #get timestamps and close price
+        # Get timestamps and close price
         most_recent_timestamp, close_price = self.extract_close_value()
         file = os.getenv('LOCAL_DATA_FILE')
         path = Path(file)
-        string = f"{most_recent_timestamp}: {close_price}"
-        path.write_text(string)
+        
+        # Create the string to append
+        new_data = f"{most_recent_timestamp}: {close_price}\n"
+        
+        # Append to file instead of overwriting
+        with open(path, 'a') as f:
+            f.write(new_data)
 
 
 settings = Settings()

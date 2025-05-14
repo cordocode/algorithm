@@ -19,7 +19,6 @@ class VirtualAssistant:
         self.market_data = AlphaVantageMarketData()
         self.trader = PaperTradingAccount()
 
-
     def check_news_sentiment(self):
         """Check the news and return sentiment"""
         # Get the news
@@ -28,6 +27,9 @@ class VirtualAssistant:
         # Get and return the sentiment
         sentiment = self.news.average_sentiment()
         print(sentiment)
+
+    def update_stock_price(self):
+        """check the current value of the stock"""
     
 
 if __name__ == "__main__":
