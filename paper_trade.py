@@ -52,7 +52,7 @@ class PaperTradingAccount:
             order_data=market_order_data
         )
         return market_order
-    
+
 
 #example instance
 investment = PaperTradingAccount()
