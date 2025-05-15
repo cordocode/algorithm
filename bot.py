@@ -1,5 +1,5 @@
 from news import AlphaVantageNews
-from extract_data import AlphaVantageMarketData
+from extract_data import WebSocketMarketData
 from paper_trade import PaperTradingAccount
 from settings import Settings
 
@@ -9,31 +9,38 @@ class VirtualAssistant:
     def __init__(self, settings):
         """initialize the unchanging variables"""
 
-        self.active_position = False
+        self.position = False
 
         #import the main variable instances from settings
         self.settings = settings
         
         #import the extract news functionality
         self.news = AlphaVantageNews(settings)
-        self.market_data = AlphaVantageMarketData()
+        self.market_data = WebSocketMarketData()
         self.trader = PaperTradingAccount()
 
-    def check_news_sentiment(self):
-        """Check the news and return sentiment"""
-        # Get the news
-        self.news.get_news()
-    
-        # Get and return the sentiment
-        sentiment = self.news.average_sentiment()
-        print(sentiment)
+    def active_position(self):
+        #store the purchase price from inactive position close
+        #initiate websocket
+        #store all future data after purchase price assuming purchase price is baseline
+        #run simple 100% down to 80% drop algorithm
+        #run simple else if negative 5% sell immediatly
+        #sell 100% of portfolio
+        #initiate inactive position
+        #close active position
 
-    def update_stock_price(self):
-        """check the current value of the stock"""
+    def inactive_position(self):
+        #initiate news method
+        #initiate time method - wait for 7:25am
+        #send news API request at 7:25
+        #if news returns good sentiment then buy 100% portfolio
+        #return purchase price
+        #initiate active position
+        #close inactive position
     
 
 if __name__ == "__main__":
-        # This code only runs when bot.py is executed directly
+    # This code only runs when bot.py is executed directly
     settings = Settings()
-    assistant = VirtualAssistant(settings)
-    assistant._news()
+    example = VirtualAssistant(settings)
+    example._news()

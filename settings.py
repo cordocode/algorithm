@@ -7,13 +7,10 @@ class Settings:
         #trading symbold
         self.ticker = "NVDA"
 
-        #data input
-        self.interval = "60min"
-        self.extended_hours = True
+        #market data entry
+        self.historical_cache = 1000
 
-        self.data_frequency = 60
-
-        #new input
+        #news input
         self.news_frequency = 5 # minutes
         self.sort = "LATEST"
         self.limit = 1
