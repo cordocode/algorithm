@@ -1,45 +1,32 @@
 import os
-import asyncio
-from collections import deque
 from dotenv import load_dotenv
 from alpaca.data.live import StockDataStream
 from settings import Settings
+from alpaca.data.enums import DataFeed 
 
-# load environment variables from .env
-load_dotenv()
+load_dotenv()                       
 
 class WebSocketMarketData:
-    """Blueprint for receiving and storing websocket market data."""
+    """Connect to Alpaca and print each new 1-minute bar’s close price."""
 
-    def __init__(self, settings):
-        # Setup Alpaca authentication from environment variables
-        self.api_key = os.getenv("ALPACA_API_KEY")
-        self.secret_key = os.getenv("ALPACA_SECRET")
+    #might need to update IEX when main subscription starts.
+    def __init__(self, settings: Settings):
+        self.ticker = settings.ticker
+        self.stream = StockDataStream(
+            api_key=os.getenv("ALPACA_API_KEY"),
+            secret_key=os.getenv("ALPACA_SECRET"),
+            feed=DataFeed.IEX
+        )
 
-        # Settings for flexibility
-        self.settings = settings
-        self.ticker = self.settings.ticker
-        self.historical_cache = self.settings.historical_cache
+    async def _handle_bar(self, bar):
+        # Alpaca calls this for every new bar
+        print(f"{bar.symbol} {bar.timestamp}  close={bar.close}")
 
-        # WebSocket initialization
-        self.stream = StockDataStream(self.api_key, self.secret_key)
-
-        #store the latest price of the bar
-        self.latest_price = None
-
-    async def handle_new_data(self, bar):
-        """Handle incoming websocket data for close price- method is automatic."""
-        #could activate time here later. just chose to take close_price for now
-        self.latest_price = bar.close
-    
-    async def start_stream(self):
-        """Starts the websocket stream."""
-        print("Subscribing to bar data...")
-        self.stream.subscribe_bars(self.handle_new_data, self.ticker)
+    def start(self):
+        print(f"Subscribing to {self.ticker} 1-min bars …")
+        self.stream.subscribe_bars(self._handle_bar, self.ticker)
+        self.stream.run()                 # blocks until you Ctrl-C
 
 
 if __name__ == "__main__":
-    settings = Settings()
-    ws_market_data = WebSocketMarketData(settings)
-    asyncio.get_event_loop().run_until_complete(ws_market_data.start_stream())
-
+    WebSocketMarketData(Settings()).start()
