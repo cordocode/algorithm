@@ -1,32 +1,41 @@
 import os
-from dotenv import load_dotenv
+import asyncio
 from alpaca.data.live import StockDataStream
+from dotenv import load_dotenv
 from settings import Settings
-from alpaca.data.enums import DataFeed 
 
-load_dotenv()                       
+load_dotenv()
+
 
 class WebSocketMarketData:
-    """Connect to Alpaca and print each new 1-minute bar’s close price."""
+    """Live market-data feed using Alpaca’s WebSocket."""
 
-    #might need to update IEX when main subscription starts.
     def __init__(self, settings: Settings):
+        # 1. auth
+        api_key    = os.getenv("ALPACA_API_KEY")
+        secret_key = os.getenv("ALPACA_SECRET")
+
+        # 2. config
         self.ticker = settings.ticker
-        self.stream = StockDataStream(
-            api_key=os.getenv("ALPACA_API_KEY"),
-            secret_key=os.getenv("ALPACA_SECRET"),
-            feed=DataFeed.IEX
-        )
+
+        # 3. Alpaca stream client
+        self.stream = StockDataStream(api_key, secret_key)
+
+    # ---------- common output ---------- #
+    def _forward_price(self, price: float):
+        """
+        Send the latest price to whatever logic you write later.
+        Replace the print with storage, indicators, etc.
+        """
+        print(price)
+    # ----------------------------------- #
 
     async def _handle_bar(self, bar):
-        # Alpaca calls this for every new bar
-        print(f"{bar.symbol} {bar.timestamp}  close={bar.close}")
+        """Called automatically by Alpaca for every new bar."""
+        price = bar.close
+        self._forward_price(price)
 
-    def start(self):
-        print(f"Subscribing to {self.ticker} 1-min bars …")
+    async def start(self):
+        """Begin live streaming."""
         self.stream.subscribe_bars(self._handle_bar, self.ticker)
-        self.stream.run()                 # blocks until you Ctrl-C
-
-
-if __name__ == "__main__":
-    WebSocketMarketData(Settings()).start()
+        await self.stream._run_forever()
