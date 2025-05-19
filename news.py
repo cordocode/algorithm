@@ -52,3 +52,18 @@ class AlphaVantageNews:
     
         # Return the average
         print(total_sentiment / len(feed))
+
+if __name__ == "__main__":
+    # Create settings instance
+    settings = Settings()
+    
+    # Create news instance and run it
+    news_client = AlphaVantageNews(settings)
+    news_client.get_news()
+    
+    # Print results
+    print("News data:")
+    news_client.print_news()
+    
+    print("\nAverage sentiment:")
+    news_client.average_sentiment()

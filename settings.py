@@ -1,4 +1,6 @@
 import os
+from datetime import datetime
+from zoneinfo import ZoneInfo   
 
 class Settings:
     """central configuration"""
@@ -8,9 +10,13 @@ class Settings:
         self.ticker = "NVDA"
 
         #news input
-        self.news_frequency = 5 # minutes
+        self.news_frequency = 1 # minutes
         self.sort = "LATEST"
         self.limit = 1
+        self.news_time_zone = ZoneInfo("America/Denver") # choose your wall-clock zone
+        self.hour = 7 
+        self.minute = 25
+        self.target = (self.hour, self.minute)
 
         #trading settings
         self.trade_amount = 20
