@@ -51,7 +51,7 @@ class AlphaVantageNews:
             total_sentiment += float(article['overall_sentiment_score'])
     
         # Return the average
-        print(total_sentiment / len(feed))
+        return total_sentiment / len(feed)
 
 if __name__ == "__main__":
     # Create settings instance

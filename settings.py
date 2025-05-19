@@ -19,7 +19,7 @@ class Settings:
         self.target = (self.hour, self.minute)
 
         #trading settings
-        self.trade_amount = 20
+        self.investment_size = 0.20
 
         #historical data extraction
         #format = YYYY-MM-DD
