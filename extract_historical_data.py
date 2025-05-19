@@ -45,7 +45,7 @@ class HistoricalMarketData:
 
         for _, row in bars_df.iterrows():
             self._forward_price(row.close)
-            time.sleep(60 / self.speed)   # ↓ sleep less for faster replay
+            time.sleep(1 / self.speed)   # ↓ sleep less for faster replay
 
 
 # quick smoke-test

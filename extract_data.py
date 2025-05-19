@@ -23,6 +23,7 @@ class WebSocketMarketData:
 
         # 4. Define Key data point - price as VB
         self.on_price  = on_price
+        
     # ---------- common output ---------- #
     def _forward_price(self, price: float):
         """

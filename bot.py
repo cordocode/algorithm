@@ -1,5 +1,6 @@
 from news import AlphaVantageNews
 from extract_data import WebSocketMarketData
+from extract_historical_data import HistoricalMarketData
 from paper_trade import PaperTradingAccount
 from settings import Settings
 
@@ -8,17 +9,18 @@ class VirtualAssistant:
 
     def __init__(self, settings):
         """initialize the unchanging variables"""
+        #initiate self as the arguments in settings
+        self.settings = settings
 
+        #set up active or incavtive state for while loops
         self.position = False
 
-        #import the main variable instances from settings
-        self.settings = settings
+        #build dynamic list to store incoming data in memory
+        self.prices = []
         
-        #import the extract news functionality
-        self.news = AlphaVantageNews(settings)
-        self.market_data = WebSocketMarketData()
-        self.trader = PaperTradingAccount()
-
+    # ───────────────────────────────────────────────
+    # STATE 1 : LIVE TRADE
+    # ──────────────────────────────────────────────
     def active_position(self):
         #store the purchase price from inactive position close
         #initiate websocket
@@ -28,7 +30,10 @@ class VirtualAssistant:
         #sell 100% of portfolio
         #initiate inactive position
         #close active position
-
+        return None
+    # ───────────────────────────────────────────────
+    # STATE 2 : NO ACTIVE TRADES
+    # ───────────────────────────────────────────────
     def inactive_position(self):
         #initiate news method
         #initiate time method - wait for 7:25am
@@ -37,10 +42,18 @@ class VirtualAssistant:
         #return purchase price
         #initiate active position
         #close inactive position
+        return None
+
+    # ========== helper methods (all private) =================
     
+    def _store_price(self, price: float):
+        self.prices.append(price)
+        print(f"{len(self.prices):>4}  |  last price: {price}")
 
 if __name__ == "__main__":
-    # This code only runs when bot.py is executed directly
-    settings = Settings()
-    example = VirtualAssistant(settings)
-    example._news()
+    settings = Settings()                  # uses dates already in settings.py
+    bot      = VirtualAssistant(settings)  # prices list already initialised
+
+    HistoricalMarketData(settings, bot._store_price).start()   # run replay
+
+    print(f"Collected {len(bot.prices)} bars.")
