@@ -1,6 +1,7 @@
 import os
 import asyncio
 import requests
+import threading
 from alpaca.data.live import StockDataStream
 from dotenv import load_dotenv
 from settings import Settings
@@ -43,6 +44,19 @@ class WebSocketMarketData:
         """Begin live streaming."""
         self.stream.subscribe_bars(self._handle_bar, self.ticker)
         await self.stream._run_forever()
+
+    # ----------------------------------- #
+    #bull shit solution to nest synchronous inside async function - start should work now in active.p
+    def start_sync(self):
+        """Start the websocket in a background thread"""
+        def run_ws():
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(self.start())
+        
+        # Start in background thread
+        thread = threading.Thread(target=run_ws, daemon=True)
+        thread.start()
 
     # --------- retrieve single latest price---------- #
     def snap_price(self):

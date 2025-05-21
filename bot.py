@@ -16,7 +16,7 @@ class VirtualAssistant:
         #initiate self as the arguments in settings
         self.settings = settings
 
-        self.news_client  = AlphaVantageNews(settings)
+        self.news = AlphaVantageNews(settings)
 
         self.market = WebSocketMarketData(settings, lambda _: None)
 
@@ -44,8 +44,8 @@ class VirtualAssistant:
         self.market.on_price = self._store_price
         
         # Start the websocket in a non-blocking way
-        asyncio.create_task(self.market.start())
-        
+        self.market.start_sync()
+
         # Main trading loop
         while self.position:
             # Check for trailing stop condition if we have prices
@@ -83,30 +83,25 @@ class VirtualAssistant:
     # STATE 2 : NO ACTIVE TRADES
     # ───────────────────────────────────────────────
     def inactive_position(self):
-       
-       while self.position == False:
-        # 1️ wait for 07:25 (or whatever is set in Settings)
-        self._wait_until(self.settings.hour,
-                        self.settings.minute,
-                        self.settings.news_time_zone)
+        while not self.position:                     # keep scanning until we own shares
+            self._wait_until()                       # ① block until next check time
 
-        # 2️ pull sentiment
-        self.news_client.get_news()
-        avg_score = self.news_client.average_sentiment()
+            self.news.get_news()
+            avg_score = self.news.average_sentiment()    # ② pull sentiment (0-1 scale)
 
-        # 3️ gate: only trade on strong positive news
-        if avg_score <= 0.35:
-            return
+            if avg_score > self.settings.sentiment_gate:
+                # ③ sentiment is good ⇒ see if we can afford a position
+                price = self.market.snap_price()
+                qty   = int(self._calculate_investment(price))
 
-        price = self.market.snap_price()
-        qty   = int(self._calculate_investment(price))
-        if qty == 0:
-            return                       
+                if qty:                              # qty == 0   → skip the buy
+                    self.account.buy(self.settings.ticker, qty)
+                    self.position       = True       # flip to “active” state
+                    self.purchase_price = price
+                    break                            # exit the inactive loop
+            # ---- else: sentiment too weak OR qty == 0 -------------------------- #
+            # fall through to the top of the while-loop → wait for tomorrow
 
-        # 4️ execute
-        self.account.buy(self.settings.ticker, qty)
-        self.position       = True
-        self.purchase_price = price
 
 
     # ========== helper methods (all private) =================
@@ -118,6 +113,7 @@ class VirtualAssistant:
         print(f"{len(self.prices):>4}  |  last price: {price}")
 
     def _wait_until(self):
+        print(f"Waiting for next news check at {self.settings.hour}:{self.settings.minute:02d}...")
         #helper method so news doesnt call itself 24/7
         hour, minute = self.settings.target
         tz = self.settings.news_time_zone
@@ -129,10 +125,17 @@ class VirtualAssistant:
             time.sleep(30)         
 
     def _calculate_investment(self, price: float):
-        dollars_to_deploy = self.settings.investment_size * self.account.cash
+        dollars_to_deploy = self.settings.investment_size * self.account.get_cash()
         return int(dollars_to_deploy // price)
 
 
 if __name__ == "__main__":
     settings = Settings()                  
-    bot      = VirtualAssistant(settings) 
+    bot = VirtualAssistant(settings) 
+    
+    # Start trading
+    while True:
+        if not bot.position:
+            bot.inactive_position()
+        else:
+            bot.active_position()

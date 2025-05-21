@@ -53,3 +53,6 @@ class PaperTradingAccount:
         )
         return market_order
 
+    def get_cash(self):
+        account = self.client.get_account()
+        return float(account.cash)

@@ -20,6 +20,7 @@ class Settings:
 
         #trading settings
         self.investment_size = 0.20
+        self.sentiment_gate = .1
 
         #historical data extraction
         #format = YYYY-MM-DD
