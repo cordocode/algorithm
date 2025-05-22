@@ -7,7 +7,6 @@ from settings import Settings
 
 load_dotenv()
 
-
 class HistoricalMarketData:
     """Replay minute bars from Alpaca and stream them to a callback."""
 

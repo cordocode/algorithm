@@ -79,6 +79,7 @@ class VirtualAssistant:
             
             # Prevent tight loop, check every second
             time.sleep(1)
+            
     # ───────────────────────────────────────────────
     # STATE 2 : NO ACTIVE TRADES
     # ───────────────────────────────────────────────
