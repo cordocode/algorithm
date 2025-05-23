@@ -8,7 +8,6 @@ from settings import Settings
 
 load_dotenv()
 
-
 class WebSocketMarketData:
     """Live market-data feed using Alpaca’s WebSocket."""
 

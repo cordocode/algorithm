@@ -58,7 +58,7 @@ class VirtualAssistant:
                     print(f"New peak: {peak_price}")
                 
                 # Calculate drawdown ratio
-                drawdown_ratio = current_price / peak_price
+                drawdown_ratio = (current_price - self.purchase_price) / (peak_price - self.purchase_price)
                 
                 # Execute trailing stop if drawdown exceeds threshold
                 if drawdown_ratio <= 0.80:
@@ -79,16 +79,16 @@ class VirtualAssistant:
             
             # Prevent tight loop, check every second
             time.sleep(1)
-            
+
     # ───────────────────────────────────────────────
     # STATE 2 : NO ACTIVE TRADES
     # ───────────────────────────────────────────────
     def inactive_position(self):
         while not self.position:                     # keep scanning until we own shares
-            self._wait_until()                       # ① block until next check time
+            self._wait_until()                       # block until next check time
 
             self.news.get_news()
-            avg_score = self.news.average_sentiment()    # ② pull sentiment (0-1 scale)
+            avg_score = self.news.average_sentiment()    # pull sentiment (0-1 scale)
 
             if avg_score > self.settings.sentiment_gate:
                 # ③ sentiment is good ⇒ see if we can afford a position
