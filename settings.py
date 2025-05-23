@@ -14,8 +14,8 @@ class Settings:
         self.sort = "LATEST"
         self.limit = 1
         self.news_time_zone = ZoneInfo("America/Denver") # choose your wall-clock zone
-        self.hour = 7 
-        self.minute = 25
+        self.hour = 14
+        self.minute = 33
         self.target = (self.hour, self.minute)
 
         #trading settings

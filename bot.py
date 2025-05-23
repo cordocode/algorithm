@@ -57,6 +57,10 @@ class VirtualAssistant:
                     peak_price = current_price
                     print(f"New peak: {peak_price}")
                 
+                if peak_price == self.purchase_price:
+                    # No profit yet, can't calculate meaningful drawdown ratio
+                    continue
+
                 # Calculate drawdown ratio
                 drawdown_ratio = (current_price - self.purchase_price) / (peak_price - self.purchase_price)
                 
